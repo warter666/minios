@@ -192,17 +192,21 @@ static void idle_task(void)
 void kernel_main(void)
 {
     uart_init();
+
+    /* populate the task table and select the first task BEFORE the scheduler
+       tick source starts: a SysTick that fires while a task's stack_init()
+       has not run (or before g_current_task is valid) would context-switch
+       into a NULL stack pointer (see issue #1) */
+    task_create(idle_task, "idle");
+    task_create(shell_task, "shell");
+    task_create(heartbeat_task, "heartbeat");
+    __asm volatile("msr psp, %0" ::"r"(task_first_sp()));
+
     /* assume ~12 MHz core clock (QEMU lm3s6965evb default): 10 ms tick */
     SYST_RVR = 120000 - 1;
     SYST_CVR = 0;
     SYST_CSR = 7; /* CLKSOURCE | TICKINT | ENABLE */
 
-    task_create(idle_task, "idle");
-    task_create(shell_task, "shell");
-    task_create(heartbeat_task, "heartbeat");
-
-    /* enter the first task; nothing to save on the kernel stack yet */
-    __asm volatile("msr psp, %0" ::"r"(task_first_sp()));
     __asm volatile("svc #0"); /* SVC_Entry_From_Kernel: jump into tasks[0] */
 
     for (;;) /* never reached */
