@@ -1,5 +1,7 @@
 # minios — mini-arm-os 风格裸机内核重写
 
+[![CI](https://github.com/warter666/minios/actions/workflows/ci.yml/badge.svg)](https://github.com/warter666/minios/actions/workflows/ci.yml)
+
 在 QEMU lm3s6965evb（Cortex-M3）上从零实现的抢占式多任务内核，含一个可交互的 shell。
 参照 [jserv/mini-arm-os](https://github.com/jserv/mini-arm-os)（1.3k★）的课程脉络与
 xv6 的调度/系统调用思想。
